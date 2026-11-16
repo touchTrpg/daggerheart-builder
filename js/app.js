@@ -2,12 +2,19 @@
   "use strict";
   const D = window.DH_DATA;
   const G = window.DH_GUIDE;
+  // 套用譯名對照表的決定：個別問題改用 PDF 或自訂譯文
+  Object.entries(G.questionOverrides || {}).forEach(([cid, o]) => {
+    const c = D.classes.find((x) => x.id === cid);
+    if (!c) return;
+    Object.entries(o.backgroundQ || {}).forEach(([i, q]) => (c.backgroundQ[+i] = q));
+    Object.entries(o.connectionQ || {}).forEach(([i, q]) => (c.connectionQ[+i] = q));
+  });
   const STORE_KEY = "dh-builder-v1";
 
   const TRAITS = [
     { id: "agility", name: "敏捷", verbs: "衝刺・跳躍・機動" },
     { id: "strength", name: "力量", verbs: "舉起・擊碎・擒抱" },
-    { id: "finesse", name: "靈巧", verbs: "操控・隱匿・修補" },
+    { id: "finesse", name: "靈巧", verbs: "控制・隱匿・巧手" },
     { id: "instinct", name: "本能", verbs: "察覺・感知・導航" },
     { id: "presence", name: "風度", verbs: "魅力・表演・欺瞞" },
     { id: "knowledge", name: "知識", verbs: "回想・分析・理解" }
@@ -255,17 +262,17 @@
   }
 
   step({
-    id: "community", label: "社群",
+    id: "community", label: "社群背景",
     valid: () => !!S.communityId,
     summary: () => com() && com().name,
     render() {
-      return head("步驟 2・血統", "你在哪裡長大？", "<strong>社群</strong>是對你成長影響最深的文化或環境，給你一項社群特性。") +
+      return head("步驟 2・血統", "你在哪裡長大？", "<strong>社群背景</strong>是對你成長影響最深的文化或環境，給你一項社群背景特性。") +
         `<div class="choices">${D.communities.map((c) => `
           <button class="choice" type="button" aria-pressed="${S.communityId === c.id}" data-action="pick" data-key="communityId" data-val="${c.id}">
             <span class="c-name">${esc(c.name)}</span>
             <span class="c-sub">${esc(c.short)}</span>
           </button>`).join("")}</div>` +
-        (com() ? `<div class="detail feat"><h3>${esc(com().name)}</h3><p>${esc(com().traits)}</p><h4>社群特性</h4>${com().features.join("")}</div>` : "");
+        (com() ? `<div class="detail feat"><h3>${esc(com().name)}</h3><p>${esc(com().traits)}</p><h4>社群背景特性</h4>${com().features.join("")}</div>` : "");
     }
   });
 
@@ -505,14 +512,14 @@
 
         <div class="pc-cols">
           <div class="pc-col">
-            ${panel("生命值與壓力", `
+            ${panel("生命點與壓力點", `
               <p class="pc-hint">將你的等級添加到傷害閾值中</p>
               <div class="pc-thresh">
                 <span class="arrow">輕度傷害</span><b>${st.minor}</b><span class="arrow">重度傷害</span><b>${st.major}</b><span class="arrow">嚴重傷害</span>
               </div>
-              <div class="pc-thresh-lbl"><span>標記 1 生命</span><span>標記 2 生命</span><span>標記 3 生命</span></div>
-              <div class="pc-track"><span>生命</span><div>${boxes(12, st.hp, "box")}</div></div>
-              <div class="pc-track"><span>壓力</span><div>${boxes(12, st.stress, "box")}</div></div>`)}
+              <div class="pc-thresh-lbl"><span>標記 1 生命點</span><span>標記 2 生命點</span><span>標記 3 生命點</span></div>
+              <div class="pc-track"><span>生命點</span><div>${boxes(12, st.hp, "box")}</div></div>
+              <div class="pc-track"><span>壓力點</span><div>${boxes(12, st.stress, "box")}</div></div>`)}
             ${panel("希望點", `
               <p class="pc-hint">花費一點希望使用經歷或幫助隊友</p>
               <div class="pc-hope">${Array.from({ length: 6 }, (_, i) => `<i class="${i < st.hope ? "on" : ""}"></i>`).join("")}</div>
@@ -587,8 +594,9 @@
         initiative: s(st.evasion),
         memo,
         status: [
-          { label: "希望點", value: "2", max: "6" },
+          { label: "生命點", value: "0", max: s(st.hp) },
           { label: "壓力點", value: "0", max: s(st.stress) },
+          { label: "希望點", value: "2", max: "6" },
           { label: "護甲槽", value: "0", max: s(st.armor) },
           { label: "傷害閾值", value: s(st.minor), max: s(st.major) }
         ],
@@ -609,7 +617,7 @@
     const L = [];
     L.push(`【${S.name}】${S.pronouns ? "（" + S.pronouns + "）" : ""}`);
     L.push(`1 級 ${ancestryLabel()}・${com().name}・${c.name}／${s.name}${s.spellTrait ? "（施法屬性：" + s.spellTrait + "）" : ""}`);
-    L.push(`閃避值 ${st.evasion}｜護甲槽 ${st.armor}｜生命點 ${st.hp}｜壓力槽 ${st.stress}｜希望 ${st.hope}｜熟練值 ${st.proficiency}`);
+    L.push(`閃避值 ${st.evasion}｜護甲槽 ${st.armor}｜生命點 ${st.hp}｜壓力點 ${st.stress}｜希望 ${st.hope}｜熟練值 ${st.proficiency}`);
     L.push(`傷害閾值：輕度 1–${st.minor - 1}（標記 1）／重度 ${st.minor}–${st.major - 1}（標記 2）／嚴重 ${st.major}+（標記 3）`);
     L.push("屬性：" + TRAITS.map((t) => t.name + fmt(S.traits[t.id])).join(" "));
     L.push("");
@@ -623,7 +631,7 @@
     [...c.hope, ...c.features].forEach((f) => L.push(stripTags(f)));
     L.push(`— 子職業：${s.name} —`);
     s.features.forEach((f) => L.push(stripTags(f)));
-    L.push("— 種族與社群 —");
+    L.push("— 種族與社群背景 —");
     [...ancestryFeatures(), ...com().features].forEach((f) => L.push(stripTags(f)));
     L.push("— 領域卡 —");
     S.cards.forEach((id) => { const x = byId(D.cards, id); L.push(`${x.name}（${domName(x.domain)}・${x.type}・回想 ${x.recall}）`); L.push(stripTags(x.text)); });
@@ -673,7 +681,7 @@
   function hintFor(st) {
     return ({
       class: "選一個職業", subclass: "選一個子職業", ancestry: S.ancestryId === "mixed-ancestry" ? "選兩個不同的種族" : "選一個種族",
-      community: "選一個社群", traits: "六項屬性都要分配", equipment: "選主武器與護甲", inventory: "選藥劑與職業物品",
+      community: "選一個社群背景", traits: "六項屬性都要分配", equipment: "選主武器與護甲", inventory: "選藥劑與職業物品",
       experiences: "填寫兩項經歷", cards: `選 ${stats() ? stats().cardsNeeded : 2} 張領域卡`, name: "替角色取個名字"
     })[st.id] || "";
   }
@@ -693,7 +701,7 @@
       ${st ? `<div class="mini-stats">
         <div><b>${st.evasion}</b><span>閃避值</span></div>
         <div><b>${st.hp}</b><span>生命點</span></div>
-        <div><b>${st.stress}</b><span>壓力槽</span></div>
+        <div><b>${st.stress}</b><span>壓力點</span></div>
         <div><b>${st.armor || "—"}</b><span>護甲槽</span></div>
         <div><b>${st.minor ? st.minor + "/" + st.major : "—"}</b><span>閾值</span></div>
         <div><b>${st.hope}</b><span>希望</span></div></div>` : ""}`;

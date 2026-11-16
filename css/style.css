@@ -328,7 +328,7 @@ input::placeholder, textarea::placeholder { color: #7d7190; }
 .pc-thresh b { font-family: var(--serif); font-size: 22px; min-width: 30px; text-align: center; }
 .pc-thresh-lbl { display: grid; grid-template-columns: repeat(3, 1fr); font-size: 11px; text-align: center; margin: 2px 0 8px; }
 .pc-track { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
-.pc-track > span { font-weight: 700; color: var(--mid); width: 34px; white-space: nowrap; }
+.pc-track > span { font-weight: 700; color: var(--mid); width: 48px; white-space: nowrap; }
 .pc-track > div { flex: 1; display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; }
 .pc-track i { height: 12px; border-radius: 3px; display: block; border: 1.5px solid var(--ink); }
 .pc-track i.off { border: 1.5px dashed #b5b5b5; }
