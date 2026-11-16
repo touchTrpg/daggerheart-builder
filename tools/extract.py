@@ -49,7 +49,7 @@ for cid in CLASSES:
     for el in d.children:
         if getattr(el,'name',None)=='h4':
             t=el.get_text(); cur = hope if '希望' in t else feats if '職業特性' in t else None
-        elif getattr(el,'name',None)=='ul' and cur is not None:
+        elif getattr(el,'name',None)=='ul' and cur is not None and 'og-ref' not in (el.get('class') or []):
             for li in el.find_all('li',recursive=False): cur.append(inner(li))
     subs=[]
     for sd in s.find_all('div',id=re.compile('^define-'+cid+'-')):

@@ -1,4 +1,4 @@
-// 來自《匕首心角色卡（繁體中文）》各職業「角色指南」頁的資料，以及職業推薦小測驗。
+// 來自《匕首心角色卡（繁體中文）》各職業「角色指南」頁的資料。
 window.DH_GUIDE = {
   // 各職業共用的外觀選項
   appearanceCommon: {
@@ -57,62 +57,4 @@ window.DH_GUIDE = {
   },
   baseInventory: "火把、50 英尺長的繩子、基礎補給品、一小把金幣",
   potions: ["小型治療藥劑（回復 1d4 生命點）", "小型精力藥劑（清除 1d4 壓力）"],
-
-  // 職業推薦小測驗：每個選項替職業加分
-  quiz: [
-    {
-      q: "隊伍在山道上遭遇伏擊。你的第一個反應是？",
-      options: [
-        { t: "衝到最前面，把攻擊全擋下來", s: { guardian: 3, warrior: 1, seraph: 1 } },
-        { t: "退到暗處，找出領頭的那個人", s: { rogue: 3, ranger: 1 } },
-        { t: "大喊口令，讓大家穩住陣腳", s: { bard: 2, seraph: 1, guardian: 1 } },
-        { t: "先看清局勢，再決定用哪一招", s: { wizard: 2, ranger: 1, druid: 1 } },
-        { t: "讓體內的力量直接爆發出來", s: { sorcerer: 3, warrior: 1 } }
-      ]
-    },
-    {
-      q: "你的力量從哪裡來？",
-      options: [
-        { t: "日復一日的苦練", s: { warrior: 3, guardian: 1, ranger: 1 } },
-        { t: "一本又一本的典籍", s: { wizard: 3, bard: 1 } },
-        { t: "與生俱來的血脈", s: { sorcerer: 3 } },
-        { t: "對神明的信仰", s: { seraph: 3 } },
-        { t: "大地與萬物的呼吸", s: { druid: 3, ranger: 1 } },
-        { t: "街頭學來的生存本事", s: { rogue: 3, bard: 1 } }
-      ]
-    },
-    {
-      q: "夥伴們私下怎麼形容你？",
-      options: [
-        { t: "最可靠的那面盾", s: { guardian: 3, seraph: 1 } },
-        { t: "派對的靈魂人物", s: { bard: 3, rogue: 1 } },
-        { t: "有點神秘的怪人", s: { sorcerer: 2, wizard: 1, druid: 1 } },
-        { t: "話不多但永遠在場的獵手", s: { ranger: 3, warrior: 1 } },
-        { t: "默默照顧所有人的那位", s: { seraph: 2, druid: 2 } }
-      ]
-    },
-    {
-      q: "難得的休息日，你會去哪裡？",
-      options: [
-        { t: "沒有路的森林深處", s: { druid: 2, ranger: 2 } },
-        { t: "塵封的圖書館", s: { wizard: 3 } },
-        { t: "熱鬧的酒館舞台", s: { bard: 3 } },
-        { t: "訓練場，再練一百次", s: { warrior: 2, guardian: 2 } },
-        { t: "夜市後面的暗巷", s: { rogue: 3 } },
-        { t: "安靜的神殿", s: { seraph: 3 } },
-        { t: "空地，試試那個還不穩定的法術", s: { sorcerer: 3 } }
-      ]
-    },
-    {
-      q: "你最害怕的是什麼？",
-      options: [
-        { t: "保護不了重要的人", s: { guardian: 3, seraph: 1 } },
-        { t: "被所有人遺忘", s: { bard: 3 } },
-        { t: "失去對自己的控制", s: { sorcerer: 3 } },
-        { t: "還有我不知道的事", s: { wizard: 3 } },
-        { t: "被困在同一個地方", s: { ranger: 1, rogue: 2, druid: 1 } },
-        { t: "在決鬥中落敗", s: { warrior: 3 } }
-      ]
-    }
-  ]
 };

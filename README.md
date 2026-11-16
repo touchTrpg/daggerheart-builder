@@ -1,6 +1,6 @@
 # 匕首心角色創建
 
-像心理測驗一樣一步一步回答問題，建立《匕首心》（Daggerheart）1 級角色，最後產生可列印、可複製的角色卡。
+一步一步回答問題，建立《匕首心》（Daggerheart）1 級角色，最後產生可列印、可複製的角色卡。
 
 純靜態網站（HTML + CSS + JavaScript），不需要建置步驟。
 
@@ -24,7 +24,7 @@ python3 -m http.server 8000
 | `css/style.css` | 樣式 |
 | `js/app.js` | 步驟流程、計算、角色卡 |
 | `js/data.js` | 職業、子職業、種族、社群、1 級領域卡、位階 1 裝備（由 SRD 抽取） |
-| `js/guide.js` | 角色指南的外觀選項、職業物品，以及職業推薦測驗題目 |
+| `js/guide.js` | 角色指南的外觀選項與職業物品 |
 | `tools/extract.py` | 從 OG-DHSRD 的 `index.html` 重新產生資料 |
 
 ### 重新產生資料

@@ -6,11 +6,11 @@
 
   const TRAITS = [
     { id: "agility", name: "敏捷", verbs: "衝刺・跳躍・機動" },
-    { id: "strength", name: "力量", verbs: "舉起・猛擊・擒抱" },
-    { id: "finesse", name: "靈巧", verbs: "控制・隱匿・巧手" },
+    { id: "strength", name: "力量", verbs: "舉起・擊碎・擒抱" },
+    { id: "finesse", name: "靈巧", verbs: "操控・隱匿・修補" },
     { id: "instinct", name: "本能", verbs: "察覺・感知・導航" },
-    { id: "presence", name: "風度", verbs: "魅力・表演・欺騙" },
-    { id: "knowledge", name: "知識", verbs: "回憶・分析・理解" }
+    { id: "presence", name: "風度", verbs: "魅力・表演・欺瞞" },
+    { id: "knowledge", name: "知識", verbs: "回想・分析・理解" }
   ];
   const POOL = { "2": 1, "1": 2, "0": 2, "-1": 1 };
   const VALUES = [2, 1, 0, -1];
@@ -42,7 +42,7 @@
 
   function blankState() {
     return {
-      mode: null, quiz: [], step: 0,
+      step: 0,
       classId: null, subclassId: null,
       ancestryId: null, mixA: null, mixB: null, mixName: "",
       communityId: null,
@@ -54,7 +54,7 @@
       cards: [],
       appearance: { clothes: [], eyes: [], skin: [], body: [], attitude: [] }, appearanceExtra: "",
       name: "", pronouns: "",
-      connections: ""
+      connections: ["", "", ""]
     };
   }
   let S = load() || blankState();
@@ -64,7 +64,9 @@
     try {
       const raw = localStorage.getItem(STORE_KEY);
       if (!raw) return null;
-      return Object.assign(blankState(), JSON.parse(raw));
+      const st = Object.assign(blankState(), JSON.parse(raw));
+      if (!Array.isArray(st.connections)) st.connections = [String(st.connections || ""), "", ""];
+      return st;
     } catch (e) { return null; }
   }
 
@@ -163,63 +165,21 @@
         <div class="dice-pair" aria-hidden="true"><div class="die hope-die">希</div><div class="die fear-die">懼</div></div>
         <h1 class="q-title">你將成為誰？</h1>
         <p class="q-hint">回答一連串問題，一步一步建立你的《匕首心》1 級角色。每一步都附上規則說明，完成後會得到一張可以列印、複製的角色卡。</p>
-        <div class="paths">
-          <button class="choice" type="button" data-action="start" data-mode="quiz">
-            <span class="c-name">先做心理測驗</span><span class="c-sub">回答 5 個問題，看看哪個職業最像你。適合第一次玩的人。</span>
-          </button>
-          <button class="choice" type="button" data-action="start" data-mode="direct">
-            <span class="c-name">直接選職業</span><span class="c-sub">已經知道想玩什麼了，跳過測驗。</span>
-          </button>
-        </div>
+        <div class="row"><button class="btn hope big" type="button" data-action="start">開始建立角色</button></div>
         ${hasProgress ? `<p class="resume">上次的角色還在。<button class="btn small" type="button" data-action="resume">繼續編輯</button> <button class="btn small ghost" type="button" data-action="reset">清除並重新開始</button></p>` : ""}
       </section>`;
     }
   });
-
-  G.quiz.forEach((q, qi) => {
-    step({
-      id: "quiz" + qi, label: null, quiz: true, autoNext: true,
-      valid: () => S.quiz[qi] != null,
-      render() {
-        return head(`心理測驗 ${qi + 1} / ${G.quiz.length}`, q.q, "") +
-          `<div class="choices list quiz-q">${q.options.map((o, oi) =>
-            `<button class="choice" type="button" aria-pressed="${S.quiz[qi] === oi}" data-action="quiz" data-q="${qi}" data-o="${oi}"><span class="c-name">${esc(o.t)}</span></button>`).join("")}</div>`;
-      }
-    });
-  });
-
-  function quizRanking() {
-    const score = {};
-    D.classes.forEach((c) => (score[c.id] = 0));
-    G.quiz.forEach((q, qi) => {
-      const o = q.options[S.quiz[qi]];
-      if (o) Object.entries(o.s).forEach(([k, v]) => (score[k] += v));
-    });
-    return D.classes.map((c) => ({ c, s: score[c.id] })).sort((a, b) => b.s - a.s);
-  }
 
   step({
     id: "class", label: "職業",
     valid: () => !!S.classId,
     summary: () => cls() && cls().name,
     render() {
-      let ranking = "";
-      let top = [];
-      if (S.mode === "quiz" && S.quiz.filter((x) => x != null).length === G.quiz.length) {
-        const r = quizRanking();
-        const max = r[0].s || 1;
-        top = r.slice(0, 2).map((x) => x.c.id);
-        ranking = `<div class="ranking" aria-label="測驗結果">${r.slice(0, 4).map((x) =>
-          `<div class="rank"><span>${esc(x.c.name)}</span><span class="rank-bar"><i style="width:${Math.round((x.s / max) * 100)}%"></i></span><span>${x.s}</span></div>`).join("")}</div>`;
-      }
-      const title = top.length ? `你最像「${cls() && top.includes(S.classId) ? cls().name : byId(D.classes, top[0]).name}」` : "你走的是哪一條路？";
-      const hint = top.length
-        ? "這是測驗的推薦，不是規定。看看下面的說明，選你最想玩的職業。"
-        : "<strong>職業</strong>決定你的兩個領域、起始閃避值與生命點，以及獨特的希望特性與職業特性。";
-      return head("步驟 1・職業", title, hint) + ranking +
+      return head("步驟 1・職業", "你走的是哪一條路？", "<strong>職業</strong>決定你的兩個領域、起始閃避值與生命點，以及獨特的希望特性與職業特性。") +
         `<div class="choices">${D.classes.map((c) => `
           <button class="choice" type="button" aria-pressed="${S.classId === c.id}" data-action="pick" data-key="classId" data-val="${c.id}">
-            <span class="c-name">${esc(c.name)}${top.includes(c.id) ? '<span class="badge">推薦</span>' : ""}</span>
+            <span class="c-name">${esc(c.name)}</span>
             <span class="c-sub">${esc(c.short)}</span>
             <span class="c-meta">${c.domains.map(domTag).join("")}</span>
           </button>`).join("")}</div>` + (cls() ? classDetail(cls()) : "");
@@ -451,14 +411,14 @@
   step({
     id: "appearance", label: "外觀",
     valid: () => true,
-    summary: () => { const n = APPEAR_ROWS.reduce((a, r) => a + S.appearance[r.id].length, 0); return n ? `已選 ${n} 項` : null; },
+    summary: () => { const n = APPEAR_ROWS.reduce((a, r) => a + S.appearance[r.id].length, 0); return S.appearanceExtra.trim() || n ? (S.appearanceExtra.trim() ? "已寫第一印象" : "") + (n ? `${S.appearanceExtra.trim() ? "・" : ""}已選 ${n} 項` : "") : null; },
     render() {
       const g = G.classes[S.classId];
       const opts = { clothes: g.clothes, attitude: g.attitude, eyes: G.appearanceCommon.eyes, skin: G.appearanceCommon.skin, body: G.appearanceCommon.body };
-      return head("角色形象", "別人第一眼看見的你", "每一行選一個或多個，也可以在最下面自己描述。這些選項來自角色卡的角色指南。") +
+      return head("角色形象", "別人第一眼看見的你", "先寫下別人對你的第一印象，再從下面每一行挑一個或多個外觀選項。選項來自角色卡的角色指南。") +
+        `<label class="field"><span>第一印象</span><textarea data-bind="appearanceExtra" placeholder="例如：總是帶著笑，但眼神從不鬆懈">${esc(S.appearanceExtra)}</textarea></label>` +
         APPEAR_ROWS.map((r) => `<div class="group"><h3>${r.name}</h3><div class="chips">${opts[r.id].map((o) =>
-          `<button type="button" class="chip" aria-pressed="${S.appearance[r.id].includes(o)}" data-action="appear" data-row="${r.id}" data-val="${esc(o)}">${esc(o)}</button>`).join("")}</div></div>`).join("") +
-        `<label class="field"><span>其他描述（選填）</span><textarea data-bind="appearanceExtra" placeholder="髮型、傷疤、口頭禪……">${esc(S.appearanceExtra)}</textarea></label>`;
+          `<button type="button" class="chip" aria-pressed="${S.appearance[r.id].includes(o)}" data-action="appear" data-row="${r.id}" data-val="${esc(o)}">${esc(o)}</button>`).join("")}</div></div>`).join("");
     }
   });
 
@@ -476,11 +436,10 @@
   step({
     id: "connections", label: "隊伍連結",
     valid: () => true,
-    summary: () => S.connections.trim() ? "已填寫" : null,
+    summary: () => S.connections.some((x) => x && x.trim()) ? "已填寫" : null,
     render() {
-      return head("步驟 9・隊伍連結", "你和夥伴之間有什麼故事？", "上桌時，向其他玩家介紹你的角色，再從下面挑一題問他們（也可以自己出題）。先把想問的、或討論後的結果記在這裡。") +
-        `<div class="detail"><h4>${esc(cls().name)}的連結問題</h4><ul>${cls().connectionQ.map((q) => `<li>${esc(q)}</li>`).join("")}</ul></div>
-         <label class="field" style="margin-top:20px"><span>連結筆記（選填）</span><textarea data-bind="connections" placeholder="例如：阿蓮是我第一次見面就救了我一命的人">${esc(S.connections)}</textarea></label>`;
+      return head("步驟 9・隊伍連結", "你和夥伴之間有什麼故事？", "上桌時，向其他玩家介紹你的角色，再拿下面的問題問他們（也可以自己出題）。把他們的回答，或你想問的人，記在每題下面。") +
+        cls().connectionQ.map((q, i) => `<label class="field"><span>${esc(q)}</span><textarea data-bind="connections.${i}" placeholder="例如：問阿蓮——她說……">${esc(S.connections[i] || "")}</textarea></label>`).join("");
     }
   });
 
@@ -497,9 +456,18 @@
   function sheetHTML() {
     const c = cls(), s = sub(), st = stats(), eq = equipment();
     const g = G.classes[S.classId];
-    const app = APPEAR_ROWS.filter((r) => S.appearance[r.id].length).map((r) => `<li>${r.name}：${esc(S.appearance[r.id].join("、"))}</li>`).join("");
-    const bg = c.backgroundQ.map((q, i) => S.background[i].trim() ? `<dt>${esc(q)}</dt><dd>${esc(S.background[i])}</dd>` : "").join("");
-    const wrow = (k, w) => w ? `<tr><td>${k}</td><td><b>${esc(w["名稱"])}</b></td><td>${esc(w["屬性"])}</td><td>${esc(w["射程"])}</td><td>${esc(dmg(w))}</td><td>${esc(w["負荷"])}</td><td>${esc(w["特性"])}</td></tr>` : "";
+    const boxes = (n, filled, cls2) => Array.from({ length: n }, (_, i) => `<i class="${cls2} ${i < filled ? "on" : "off"}"></i>`).join("");
+    const panel = (title, body, extra) => `<section class="pc-panel ${extra || ""}"><h3 class="pc-tab"><span>${title}</span></h3>${body}</section>`;
+    const weapon = (label, w) => `<div class="pc-weapon">
+        <div class="pc-sub">${label}</div>
+        <div class="pc-line3"><span class="v">${w ? esc(w["名稱"]) : ""}</span><span class="v">${w ? esc(w["屬性"] + "・" + w["射程"]) : ""}</span><span class="v">${w ? esc(dmg(w)) : ""}</span></div>
+        <div class="pc-line3 lbl"><span>名稱</span><span>使用屬性與攻擊距離</span><span>傷害值與傷害類型</span></div>
+        <div class="pc-feat"><span class="lbl">特性</span><span class="v">${w && w["特性"] !== "—" ? esc(w["特性"]) : ""}${w ? `${w["特性"] !== "—" ? "　" : ""}<span class="muted">${esc(w["負荷"])}</span>` : ""}</span></div>
+      </div>`;
+    const app = APPEAR_ROWS.filter((r) => S.appearance[r.id].length).map((r) => `<li><b>${r.name}</b>${esc(S.appearance[r.id].join("、"))}</li>`).join("");
+    const qa = (qs, ans) => qs.map((q, i) => `<div class="pc-qa"><p class="q">${esc(q)}</p><p class="a">${esc((ans[i] || "").trim()) || "&nbsp;"}</p></div>`).join("");
+    const inv = [G.baseInventory, G.potions[S.potion], g.classItems[S.classItem]].concat(S.spellbook ? ["法術記錄於：" + S.spellbook] : []);
+
     return `<p class="q-kicker">完成</p><h1 class="q-title">這就是你的角色</h1>
       <div class="row sheet-actions">
         <button class="btn hope" type="button" data-action="copy">複製文字版</button>
@@ -508,58 +476,91 @@
         <button class="btn ghost" type="button" data-action="reset">建立新角色</button>
       </div>
       <p class="toast" id="toast" role="status"></p>
-      <article class="sheet" id="sheet">
-        <h2>${esc(S.name)}</h2>
-        <p class="who">${S.pronouns ? esc(S.pronouns) + "・" : ""}1 級 ${esc(ancestryLabel())}・${esc(com().name)}・${esc(c.name)}（${esc(s.name)}）${s.spellTrait ? "・施法屬性 " + esc(s.spellTrait) : ""}</p>
-
-        <div class="sheet-stats">
-          <div class="stat"><b>${st.evasion}</b><span>閃避值</span></div>
-          <div class="stat"><b>${st.armor}</b><span>護甲槽</span></div>
-          <div class="stat"><b>${st.hp}</b><span>生命點</span></div>
-          <div class="stat"><b>${st.stress}</b><span>壓力槽</span></div>
-          <div class="stat"><b>${st.hope}</b><span>希望</span></div>
-          <div class="stat"><b>${st.proficiency}</b><span>熟練值</span></div>
-        </div>
-        <div class="thresholds">
-          <div><b>1–${st.minor - 1}</b>輕度傷害<br>標記 1 生命</div>
-          <div><b>${st.minor}–${st.major - 1}</b>重度傷害<br>標記 2 生命</div>
-          <div><b>${st.major}+</b>嚴重傷害<br>標記 3 生命</div>
-        </div>
-        ${st.notes.length ? `<p class="note">${esc(st.notes.join("、"))}</p>` : ""}
-
-        <h3>屬性</h3>
-        <div class="sheet-traits">${TRAITS.map((t) => `<div><b>${fmt(S.traits[t.id])}</b>${t.name}<small>${t.verbs}</small></div>`).join("")}</div>
-
-        <h3>裝備</h3>
-        <table><thead><tr><th></th><th>名稱</th><th>屬性</th><th>射程</th><th>傷害</th><th>負荷</th><th>特性</th></tr></thead>
-          <tbody>${wrow("主武器", eq.primary)}${wrow("副武器", eq.secondary)}</tbody></table>
-        ${eq.armor ? `<p style="margin-top:8px"><b>${esc(eq.armor["名稱"])}</b>　基礎閾值 ${esc(eq.armor["閾值"])}・護甲值 ${esc(eq.armor["護甲值"])}・${esc(eq.armor["特性"])}</p>` : ""}
-
-        <div class="cols">
-          <div>
-            <h3>經歷</h3>
-            <ul>${S.experiences.map((x) => `<li>${esc(x)} +2</li>`).join("")}</ul>
+      <article class="pc" id="sheet">
+      <div class="pc-page">
+        <header class="pc-head">
+          <div class="pc-banner"><div class="pc-class">${esc(c.name)}</div><div class="pc-doms">${c.domains.map(domName).join(" / ")}</div></div>
+          <div class="pc-fields">
+            <div class="pc-field"><span class="lbl">姓名</span><span class="v">${esc(S.name)}${S.pronouns ? `<span class="muted">（${esc(S.pronouns)}）</span>` : ""}</span></div>
+            <div class="pc-field"><span class="lbl">種族</span><span class="v">${esc(ancestryLabel())}</span></div>
+            <div class="pc-field"><span class="lbl">社群背景</span><span class="v">${esc(com().name)}</span></div>
+            <div class="pc-field"><span class="lbl">子職業</span><span class="v">${esc(s.name)}${s.spellTrait ? `<span class="muted">（施法：${esc(s.spellTrait)}）</span>` : ""}</span></div>
           </div>
-          <div>
-            <h3>背包</h3>
-            <ul><li>${esc(G.baseInventory)}</li><li>${esc(G.potions[S.potion])}</li><li>${esc(g.classItems[S.classItem])}</li>${S.spellbook ? `<li>法術記錄於：${esc(S.spellbook)}</li>` : ""}</ul>
+          <div class="pc-level"><div class="shield"><b>1</b></div><span class="pc-plate">等級</span></div>
+        </header>
+
+        <section class="pc-row1">
+          <div class="pc-defense">
+            <div class="pc-stat"><div class="shield round"><b>${st.evasion}</b></div><span class="pc-plate">閃避值</span><small>起始值為${c.evasion}</small></div>
+            <div class="pc-stat"><div class="shield"><b>${st.armor}</b></div><span class="pc-plate">護甲值</span></div>
+            <div class="pc-slots" aria-label="護甲槽 ${st.armor} 格">${boxes(Math.max(st.armor, 0), 0, "slot")}</div>
+          </div>
+          <div class="pc-traits">${TRAITS.map((t) => `<div class="pc-trait">
+              <span class="pc-tlabel">${t.name}</span>
+              <div class="shield small"><b>${fmt(S.traits[t.id])}</b></div>
+              <small>${t.verbs.split("・").join("<br>")}</small></div>`).join("")}</div>
+        </section>
+        ${st.notes.length ? `<p class="pc-note">${esc(st.notes.join("、"))}</p>` : ""}
+
+        <div class="pc-cols">
+          <div class="pc-col">
+            ${panel("生命值與壓力", `
+              <p class="pc-hint">將你的等級添加到傷害閾值中</p>
+              <div class="pc-thresh">
+                <span class="arrow">輕度傷害</span><b>${st.minor}</b><span class="arrow">重度傷害</span><b>${st.major}</b><span class="arrow">嚴重傷害</span>
+              </div>
+              <div class="pc-thresh-lbl"><span>標記 1 生命</span><span>標記 2 生命</span><span>標記 3 生命</span></div>
+              <div class="pc-track"><span>生命</span><div>${boxes(12, st.hp, "box")}</div></div>
+              <div class="pc-track"><span>壓力</span><div>${boxes(12, st.stress, "box")}</div></div>`)}
+            ${panel("希望點", `
+              <p class="pc-hint">花費一點希望使用經歷或幫助隊友</p>
+              <div class="pc-hope">${Array.from({ length: 6 }, (_, i) => `<i class="${i < st.hope ? "on" : ""}"></i>`).join("")}</div>
+              <div class="pc-text">${c.hope.join("")}</div>`)}
+            ${panel("經歷", `<ul class="pc-lines">${S.experiences.map((x) => `<li><span>${esc(x)}</span><b>+2</b></li>`).join("")}<li></li><li></li></ul>`)}
+            ${panel("金幣", `<div class="pc-gold">
+                <div><div class="coins">${boxes(10, 1, "coin")}</div><span>把</span></div>
+                <div><div class="coins">${boxes(10, 0, "bag")}</div><span>袋</span></div>
+                <div><div class="coins">${boxes(1, 0, "chest")}</div><span>箱</span></div></div>`)}
+            ${panel("職業特性", `<div class="pc-text">${c.features.join("")}</div>`)}
+          </div>
+          <div class="pc-col">
+            ${panel("裝備武器", `
+              <div class="pc-prof"><span>熟練值</span>${Array.from({ length: 6 }, (_, i) => `<i class="${i < st.proficiency ? "on" : ""}"></i>`).join("")}</div>
+              ${weapon("主武器", eq.primary)}${weapon("副武器", eq.secondary)}`)}
+            ${panel("裝備護甲", `<div class="pc-weapon">
+                <div class="pc-line3"><span class="v">${eq.armor ? esc(eq.armor["名稱"]) : ""}</span><span class="v">${eq.armor ? esc(eq.armor["閾值"]) : ""}</span><span class="v">${eq.armor ? esc(eq.armor["護甲值"]) : ""}</span></div>
+                <div class="pc-line3 lbl"><span>名稱</span><span>基礎閾值</span><span>護甲值</span></div>
+                <div class="pc-feat"><span class="lbl">特性</span><span class="v">${eq.armor && eq.armor["特性"] !== "—" ? esc(eq.armor["特性"]) : ""}</span></div></div>`)}
+            ${panel("背包", `<ul class="pc-lines">${inv.map((x) => `<li><span>${esc(x)}</span></li>`).join("")}<li></li><li></li><li></li></ul>`)}
+            ${panel("庫存武器", `${weapon("", null)}`, "pc-faint")}
           </div>
         </div>
+        <p class="pc-foot">Daggerheart © Darrington Press 2025</p>
+      </div>
 
-        <h3>職業特性</h3>
-        <div class="feat">${c.hope.join("")}${c.features.join("")}</div>
-        <h3>子職業：${esc(s.name)}（基礎）</h3>
-        <div class="feat">${s.features.join("")}</div>
-        <h3>種族與社群特性</h3>
-        <div class="feat">${ancestryFeatures().join("")}${com().features.join("")}</div>
-
-        <h3>領域卡</h3>
-        ${S.cards.map((id) => { const x = byId(D.cards, id); return `<div class="card-block feat"><div class="t">${esc(x.name)}</div><div class="m">${esc(domName(x.domain))}・${esc(x.type)}・1 級・回想費用 ${x.recall}</div>${x.text}</div>`; }).join("")}
-
-        ${app || S.appearanceExtra ? `<h3>外觀</h3><ul>${app}</ul>${S.appearanceExtra ? `<p>${esc(S.appearanceExtra)}</p>` : ""}` : ""}
-        ${bg || S.backgroundExtra ? `<h3>背景</h3><dl class="qa">${bg}</dl>${S.backgroundExtra ? `<p>${esc(S.backgroundExtra)}</p>` : ""}` : ""}
-        ${S.connections.trim() ? `<h3>隊伍連結</h3><p>${esc(S.connections)}</p>` : ""}
-        ${c.id === "druid" || c.id === "ranger" ? `<p class="note" style="margin-top:20px">${c.id === "druid" ? "德魯伊的野獸形態選項請參考 SRD 或角色卡附頁。" : s.id === "ranger-beastbound" ? "記得和主持人一起建立你的動物夥伴（見角色卡附頁）。" : ""}</p>` : ""}
+      <div class="pc-page">
+        <header class="pc-head slim">
+          <div class="pc-banner"><div class="pc-class">${esc(S.name || c.name)}</div><div class="pc-doms">角色指南</div></div>
+        </header>
+        <div class="pc-cols">
+          <div class="pc-col">
+            ${panel("子職業：" + esc(s.name), `<p class="pc-hint">基礎特性</p><div class="pc-text">${s.features.join("")}</div>`)}
+            ${panel("種族：" + esc(ancestryLabel()), `<div class="pc-text">${ancestryFeatures().join("")}</div>`)}
+            ${panel("社群背景：" + esc(com().name), `<div class="pc-text">${com().features.join("")}</div>`)}
+          </div>
+          <div class="pc-col">
+            ${panel("領域卡", S.cards.map((id) => { const x = byId(D.cards, id); return `<div class="pc-card"><div class="t">${esc(x.name)}</div><div class="m">${esc(domName(x.domain))}・${esc(x.type)}・1 級・回想費用 ${x.recall}</div><div class="pc-text">${x.text}</div></div>`; }).join(""))}
+          </div>
+        </div>
+        ${panel("角色形象", `${S.appearanceExtra.trim() ? `<p class="pc-impression"><b>第一印象</b>${esc(S.appearanceExtra)}</p>` : ""}${app ? `<ul class="pc-look">${app}</ul>` : ""}${!app && !S.appearanceExtra.trim() ? '<p class="pc-hint">（未填寫）</p>' : ""}`)}
+        <div class="pc-cols">
+          <div class="pc-col">${panel("背景問題", qa(c.backgroundQ, S.background) + (S.backgroundExtra.trim() ? `<div class="pc-qa"><p class="q">補充設定</p><p class="a">${esc(S.backgroundExtra)}</p></div>` : ""))}</div>
+          <div class="pc-col">${panel("關係", qa(c.connectionQ, S.connections))}</div>
+        </div>
+        ${c.id === "druid" ? '<p class="pc-note">德魯伊的野獸形態選項請參考 SRD 或角色卡附頁。</p>' : ""}
+        ${s.id === "ranger-beastbound" ? '<p class="pc-note">記得和主持人一起建立你的動物夥伴（見角色卡附頁）。</p>' : ""}
+        <p class="pc-foot">Daggerheart © Darrington Press 2025</p>
+      </div>
       </article>`;
   }
 
@@ -587,15 +588,16 @@
     L.push("— 領域卡 —");
     S.cards.forEach((id) => { const x = byId(D.cards, id); L.push(`${x.name}（${domName(x.domain)}・${x.type}・回想 ${x.recall}）`); L.push(stripTags(x.text)); });
     const app = APPEAR_ROWS.filter((r) => S.appearance[r.id].length).map((r) => r.name + "：" + S.appearance[r.id].join("、"));
-    if (app.length || S.appearanceExtra) { L.push("— 外觀 —"); app.forEach((x) => L.push(x)); if (S.appearanceExtra) L.push(S.appearanceExtra); }
+    if (app.length || S.appearanceExtra) { L.push("— 角色形象 —"); if (S.appearanceExtra) L.push("第一印象：" + S.appearanceExtra); app.forEach((x) => L.push(x)); }
     const bg = c.backgroundQ.map((q, i) => S.background[i].trim() ? `Q：${q}\nA：${S.background[i]}` : "").filter(Boolean);
     if (bg.length || S.backgroundExtra) { L.push("— 背景 —"); bg.forEach((x) => L.push(x)); if (S.backgroundExtra) L.push(S.backgroundExtra); }
-    if (S.connections.trim()) { L.push("— 隊伍連結 —"); L.push(S.connections); }
+    const con = c.connectionQ.map((q, i) => S.connections[i] && S.connections[i].trim() ? `Q：${q}\nA：${S.connections[i]}` : "").filter(Boolean);
+    if (con.length) { L.push("— 隊伍連結 —"); con.forEach((x) => L.push(x)); }
     return L.join("\n");
   }
 
   // ---------- flow ----------
-  function activeSteps() { return STEPS.filter((s) => !s.quiz || S.mode === "quiz"); }
+  function activeSteps() { return STEPS; }
   function currentStep() { const a = activeSteps(); return a[Math.min(S.step, a.length - 1)]; }
   function canReach(idx) {
     const a = activeSteps();
@@ -675,8 +677,7 @@
     const val = b.dataset.val;
     switch (act) {
       case "home": S.step = 0; render(true); break;
-      case "start":
-        S.mode = b.dataset.mode; S.step = 1; render(true); break;
+      case "start": S.step = 1; render(true); break;
       case "resume": {
         const a = activeSteps();
         let i = 1; while (i < a.length - 1 && (!a[i].valid || a[i].valid())) i++;
@@ -686,15 +687,10 @@
       case "prev": go(-1); break;
       case "next": go(1); break;
       case "goto": S.step = +b.dataset.i; closeSummary(); render(true); break;
-      case "quiz":
-        S.quiz[+b.dataset.q] = +b.dataset.o;
-        render();
-        setTimeout(() => go(1), 220);
-        break;
       case "pick": {
         const key = b.dataset.key;
         if (key === "classId" && S.classId !== val) {
-          Object.assign(S, { subclassId: null, cards: [], classItem: null, primary: null, secondary: null, armor: null, background: ["", "", ""] });
+          Object.assign(S, { subclassId: null, cards: [], classItem: null, primary: null, secondary: null, armor: null, background: ["", "", ""], connections: ["", "", ""] });
           S.appearance.clothes = []; S.appearance.attitude = [];
         }
         if (key === "subclassId" && S.subclassId !== val) S.cards = [];
