@@ -470,7 +470,8 @@
 
     return `<p class="q-kicker">完成</p><h1 class="q-title">這就是你的角色</h1>
       <div class="row sheet-actions">
-        <button class="btn hope" type="button" data-action="copy">複製文字版</button>
+        <button class="btn hope" type="button" data-action="copy-platform">複製到跑團平台</button>
+        <button class="btn" type="button" data-action="copy">複製文字版</button>
         <button class="btn" type="button" data-action="print">列印 / 存成 PDF</button>
         <button class="btn" type="button" data-action="download">下載 JSON</button>
         <button class="btn ghost" type="button" data-action="reset">建立新角色</button>
@@ -562,6 +563,45 @@
         <p class="pc-foot">Daggerheart © Darrington Press 2025</p>
       </div>
       </article>`;
+  }
+
+  // 跑團平台的角色資料格式（kind: character）
+  function platformJSON() {
+    const st = stats(), eq = equipment(), g = G.classes[S.classId];
+    const s = String;
+    const memo = [G.baseInventory, G.potions[S.potion], g.classItems[S.classItem]]
+      .concat(S.spellbook ? ["法術記錄於：" + S.spellbook] : []).join("\n");
+    const weaponCmd = (w) => {
+      if (!w) return null;
+      const m = /^(d\d+(?:\s*[+\-]\s*\d+)?)\s*(物|魔)$/.exec(w["傷害"].trim());
+      const dice = m ? st.proficiency + m[1].replace(/\s+/g, "") : st.proficiency + w["傷害"];
+      const type = m ? (m[2] === "魔" ? "魔法" : "物理") : "";
+      return `${dice} ${w["名稱"]}傷害．${type}`;
+    };
+    const commands = TRAITS.map((t) => `1D12+1D12+{${t.name}} ${t.name}`)
+      .concat([weaponCmd(eq.primary), weaponCmd(eq.secondary)].filter(Boolean)).join("\n");
+    return JSON.stringify({
+      kind: "character",
+      data: {
+        name: S.name.trim(),
+        initiative: s(st.evasion),
+        memo,
+        status: [
+          { label: "希望點", value: "2", max: "6" },
+          { label: "壓力點", value: "0", max: s(st.stress) },
+          { label: "護甲槽", value: "0", max: s(st.armor) },
+          { label: "傷害閾值", value: s(st.minor), max: s(st.major) }
+        ],
+        params: TRAITS.map((t) => ({ label: t.name, value: s(S.traits[t.id]) })),
+        commands
+      }
+    });
+  }
+
+  function copyText(text, okMsg) {
+    try {
+      navigator.clipboard.writeText(text).then(() => toast(okMsg), () => fallbackCopy(text, okMsg));
+    } catch (err) { fallbackCopy(text, okMsg); }
   }
 
   function sheetText() {
@@ -736,13 +776,8 @@
         if (i >= 0) arr.splice(i, 1); else arr.push(val);
         render(); break;
       }
-      case "copy": {
-        const text = sheetText();
-        try {
-          navigator.clipboard.writeText(text).then(() => toast("已複製到剪貼簿。"), () => fallbackCopy(text));
-        } catch (err) { fallbackCopy(text); }
-        break;
-      }
+      case "copy": copyText(sheetText(), "已複製文字版。"); break;
+      case "copy-platform": copyText(platformJSON(), "已複製跑團平台格式，到平台上直接貼上即可。"); break;
       case "print":
         try { window.print(); } catch (err) { toast("這個頁面無法列印，請用瀏覽器選單列印。"); }
         break;
@@ -767,14 +802,14 @@
 
   function closeSummary() { $("#summary").classList.remove("open"); $(".summary-toggle").setAttribute("aria-expanded", "false"); }
 
-  function fallbackCopy(text) {
+  function fallbackCopy(text, okMsg) {
     const ta = document.createElement("textarea");
     ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
     document.body.appendChild(ta); ta.select();
     let ok = false;
     try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
     ta.remove();
-    toast(ok ? "已複製到剪貼簿。" : "無法自動複製，請手動選取角色卡文字。");
+    toast(ok ? (okMsg || "已複製到剪貼簿。") : "無法自動複製，請改用瀏覽器的複製功能。");
   }
 
   // text inputs: update state without re-rendering (keeps focus)
