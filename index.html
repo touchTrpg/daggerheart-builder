@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>匕首心角色創建</title>
+<meta name="description" content="一步一步回答問題，建立你的《匕首心》1 級角色。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Cpolygon points=%2216,1 30,9 30,23 16,31 2,23 2,9%22 fill=%22%23e4b23e%22/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="topbar">
+  <button class="brand" data-action="home" type="button">匕首心<span>角色創建</span></button>
+  <div class="track" aria-hidden="true"><div class="track-fill" id="trackFill"></div></div>
+  <div class="step-count" id="stepCount"></div>
+  <button class="summary-toggle" data-action="toggle-summary" type="button" aria-controls="summary" aria-expanded="false">我的角色</button>
+</header>
+
+<div class="layout">
+  <main id="stage" tabindex="-1" aria-live="polite"></main>
+  <aside id="summary" class="summary" aria-label="角色進度"></aside>
+</div>
+
+<nav class="pager" id="pager">
+  <button type="button" class="btn ghost" data-action="prev" id="prevBtn">上一步</button>
+  <p class="pager-hint" id="pagerHint"></p>
+  <button type="button" class="btn hope" data-action="next" id="nextBtn">下一步</button>
+</nav>
+
+<footer class="credits">
+  <p>本站為非官方愛好者工具，與 Darrington Press 無關。規則文字取自 <a href="https://sassttrpgtools.github.io/og-dhsrd/">Old Gus《匕首心》系統參考文件（繁體中文版，Sass 編譯）</a>，依 <a href="https://www.darringtonpress.com/license">Darrington Press 社群遊戲授權條款（DPCGL）</a>使用。Daggerheart © Critical Role, LLC.</p>
+</footer>
+
+<script src="js/data.js"></script>
+<script src="js/guide.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
