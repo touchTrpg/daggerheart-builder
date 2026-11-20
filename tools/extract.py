@@ -128,7 +128,7 @@ for d in s.find_all('div',class_='og-domain'):
     dom=next(k for k in DOM if 'og-domain-'+k in d['class'])
     typ=re.sub(r'等級|級|\d+|\s','',head).replace(DOM[dom],'').strip()
     recall=re.search(r'\d+',lis[1].get_text()).group()
-    cards.append(dict(id=h['id'],name=txt(h),domain=dom,level=lvl,type=typ,recall=int(recall),text=inner(lis[2])))
+    cards.append(dict(id=h['id'],name=txt(h),domain=dom,level=lvl,type=typ,recall=int(recall),text='\n'.join(inner(li) for li in lis[2:])))
 
 def wtable(id_):
     h=s.find(id=id_); t=h.find_next('table')

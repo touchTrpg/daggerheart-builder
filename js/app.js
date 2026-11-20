@@ -591,7 +591,7 @@
       kind: "character",
       data: {
         name: S.name.trim(),
-        initiative: s(st.evasion),
+        initiative: st.evasion, // 行動力：平台要數字，不能是字串
         memo,
         status: [
           { label: "生命點", value: "0", max: s(st.hp) },
@@ -787,6 +787,7 @@
       case "copy": copyText(sheetText(), "已複製文字版。"); break;
       case "copy-platform": copyText(platformJSON(), "已複製跑團平台格式，到平台上直接貼上即可。"); break;
       case "print":
+        fitPrintPages();
         try { window.print(); } catch (err) { toast("這個頁面無法列印，請用瀏覽器選單列印。"); }
         break;
       case "download": {
@@ -807,6 +808,28 @@
       }
     }
   });
+
+  // 列印：用桌面預覽的版面，並把每一頁縮放到剛好一張 A4（四邊 8mm 邊界）
+  const PRINT_W = 730, PRINT_H = 1050; // A4 可印範圍約 733 × 1062 px，留一點餘裕
+  function fitPrintPages() {
+    const pc = $(".pc");
+    if (!pc) return;
+    pc.classList.add("print-layout");
+    pc.querySelectorAll(".pc-page").forEach((page) => {
+      page.style.zoom = "";
+      const r = page.getBoundingClientRect();
+      const z = Math.min(PRINT_W / r.width, PRINT_H / r.height, 1);
+      page.style.zoom = String(Math.floor(z * 1000) / 1000);
+    });
+  }
+  function resetPrintPages() {
+    const pc = $(".pc");
+    if (!pc) return;
+    pc.classList.remove("print-layout");
+    pc.querySelectorAll(".pc-page").forEach((page) => (page.style.zoom = ""));
+  }
+  window.addEventListener("beforeprint", fitPrintPages);
+  window.addEventListener("afterprint", resetPrintPages);
 
   function closeSummary() { $("#summary").classList.remove("open"); $(".summary-toggle").setAttribute("aria-expanded", "false"); }
 

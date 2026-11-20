@@ -376,8 +376,12 @@ input::placeholder, textarea::placeholder { color: #7d7190; }
 .credits { color: #7d7190; font-size: 12px; padding: 0 24px 90px; max-width: 1180px; margin: 0 auto; }
 .credits a { color: var(--muted); }
 
+/* print layout: same as the desktop preview; app.js scales each page to fit one A4 sheet */
+.pc.print-layout { max-width: none; }
+.pc.print-layout .pc-page { width: 940px; }
+
 /* responsive */
-@media (max-width: 960px) {
+@media screen and (max-width: 960px) {
   .layout { grid-template-columns: 1fr; gap: 0; padding: 24px 16px 120px; }
   .summary {
     position: fixed; inset: 57px 0 0 auto; width: min(340px, 90vw); z-index: 30;
@@ -392,15 +396,15 @@ input::placeholder, textarea::placeholder { color: #7d7190; }
   .pager-hint { display: none; }
   .trait { grid-template-columns: 1fr auto; }
   .trait-verbs { display: none; }
-  .pc-head { grid-template-columns: 1fr 80px; }
-  .pc-head .pc-banner { grid-column: 1 / -1; }
-  .pc-fields { padding: 10px 0 10px 10px; }
-  .pc-row1 { grid-template-columns: 1fr; }
-  .pc-traits { grid-template-columns: repeat(3, 1fr); border-left: 0; padding-left: 0; row-gap: 12px; }
-  .pc-cols { grid-template-columns: 1fr; }
-  .pc-look { grid-template-columns: 1fr; }
+  .pc:not(.print-layout) .pc-head { grid-template-columns: 1fr 80px; }
+  .pc:not(.print-layout) .pc-head .pc-banner { grid-column: 1 / -1; }
+  .pc:not(.print-layout) .pc-fields { padding: 10px 0 10px 10px; }
+  .pc:not(.print-layout) .pc-row1 { grid-template-columns: 1fr; }
+  .pc:not(.print-layout) .pc-traits { grid-template-columns: repeat(3, 1fr); border-left: 0; padding-left: 0; row-gap: 12px; }
+  .pc:not(.print-layout) .pc-cols { grid-template-columns: 1fr; }
+  .pc:not(.print-layout) .pc-look { grid-template-columns: 1fr; }
 }
-@media (max-width: 480px) {
+@media screen and (max-width: 480px) {
   .val { width: 40px; }
   .choices { grid-template-columns: 1fr 1fr; }
   .c-name { font-size: 19px; }
@@ -412,10 +416,11 @@ input::placeholder, textarea::placeholder { color: #7d7190; }
   .topbar, .pager, .summary, .sheet-actions, .credits, .q-kicker, .q-title, .q-hint { display: none !important; }
   .layout { display: block; padding: 0; max-width: none; }
   .toast { display: none; }
-  @page { size: letter; margin: 8mm; }
+  @page { size: A4; margin: 8mm; }
+  html, body { background: #fff; }
+  main { padding: 0; }
   .pc { max-width: none; }
-  .pc-page { border-radius: 0; margin: 0; break-after: page; }
+  .pc-page { border-radius: 0; margin: 0; break-after: page; break-inside: avoid; overflow: hidden; }
   .pc-page:last-child { break-after: auto; }
-  .pc-panel, .pc-card { break-inside: avoid; }
   .pc * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
