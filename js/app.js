@@ -594,11 +594,12 @@
         initiative: st.evasion, // 行動力：平台要數字，不能是字串
         memo,
         status: [
-          { label: "生命點", value: "0", max: s(st.hp) },
-          { label: "壓力點", value: "0", max: s(st.stress) },
-          { label: "希望點", value: "2", max: "6" },
-          { label: "護甲槽", value: "0", max: s(st.armor) },
-          { label: "傷害閾值", value: s(st.minor), max: s(st.major) }
+          // 依 CCFOLIA Clipboard API：status 的 value、max 是數字
+          { label: "生命點", value: 0, max: st.hp },
+          { label: "壓力點", value: 0, max: st.stress },
+          { label: "希望點", value: 2, max: 6 },
+          { label: "護甲槽", value: 0, max: st.armor },
+          { label: "傷害閾值", value: st.minor, max: st.major }
         ],
         params: TRAITS.map((t) => ({ label: t.name, value: s(S.traits[t.id]) })),
         commands
